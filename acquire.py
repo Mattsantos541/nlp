@@ -1,23 +1,32 @@
 #make new request
 # imports
- from requests import get
- from bs4 import BeautifulSoup
- import os
- import pandas as pd
+from requests import get
+from bs4 import BeautifulSoup
+import os
+import pandas as pd
 
- def get_news_articles():
 
-     return make_new_request()
+def get_article_text():
+    # if we already have the data, read it locally
+    if os.path.exists('article.txt'):
+        with open('article.txt') as f:
+            return f.read()
 
-     # filename = 'inshorts_news_articles.csv'
+    # otherwise go fetch the data
+    
+    headers = {'User-Agent': 'Codeup Ada Data Science'}
+    response = get(url, headers=headers)
+    soup = BeautifulSoup(response.text)
+    article = soup.find('div', class_='mk-single-content')
 
-     # # check for presence of the file or make a new request
-     # if os.path.exists(filename):
-     #     return pd.read_csv(filename)
-     # else:
-     #     return make_new_request()
+    # save it for next time
+    with open('article.txt', 'w') as f:
+        f.write(article.text)
 
- def get_articles_from_topic(url):
+    return article.text
+
+
+def get_articles_from_topic(url):
      headers = {'user-agent': 'Codeup Bayes Instructor Example'}
      response = get(url, headers=headers)
      soup = BeautifulSoup(response.content, 'html.parser')
@@ -46,26 +55,47 @@
      return output
 
 
- def make_new_request():
-     urls = [
+def make_new_request():
+    urls = [
          "https://inshorts.com/en/read/business",
          "https://inshorts.com/en/read/sports",
          "https://inshorts.com/en/read/technology",
          "https://inshorts.com/en/read/entertainment"
      ]
 
-     output = []
+    output = []
 
-     for url in urls:
-         # We use .extend in order to make a flat output list.
-         output.extend(get_articles_from_topic(url))
+    for url in urls:
+     # We use .extend in order to make a flat output list.
+        output.extend(get_articles_from_topic(url))
 
-     print("stuff")
-     print(output)
-     df = pd.DataFrame(output)
-     df.to_csv('inshorts_news_articles.csv') 
+        print("stuff")
+        print(output)
+        df = pd.DataFrame(output)
+        df.to_csv('inshorts_news_articles.csv') 
+        
+        return df
 
-     return df
 
 
- print(get_news_articles()) 
+
+
+def get_news_articles():
+    filename = 'inshorts_news_articles.csv'
+    return make_new_request()
+
+     # filename = 'inshorts_news_articles.csv'
+
+     # # check for presence of the file or make a new request
+     # if os.path.exists(filename):
+     #     return pd.read_csv(filename)
+     # else:
+     #     return make_new_request()
+     # check for presence of the file or make a new request
+    if os.path.exists(filename):
+         return pd.read_csv(filename)
+    else:
+         return make_new_request()
+
+def get_articles_from_topic(url):
+    headers = {'user-agent': 'Codeup Bayes Instructor Example'}
